@@ -59,21 +59,93 @@ class SmartController:
 			self.harmony_port = harmony_data["port"]
 			logging.debug("Harmony Config - ip:"+self.harmony_ip+" - port:"+self.harmony_port)
 	
+	# Helper Function	
+	def findDevice(devices,label):
+		logging.info("Smarthings:FindDevice:"+str(len(devices))+" Devices found")
 		
+		for device in devices:
+			logging.info("Smarthings:FindDevice:"+device.label+"("+str(device.device_id)+")")
+			if(device.label == label):
+				return device
+			
+			return None
+
+	#Helper function
+	# Return pysmartthings object
+	async def smartthings_find_device_by_name(self, device_name):
+		device = None
+
+		async with aiohttp.ClientSession() as session:
+			api = pysmartthings.SmartThings(session, token)
+			
+			devices = await api.devices()
+			deviceName = "device_name"
+			device = SmartController.findDevice(devices, deviceName)
+
+			if (device == None):
+				logging.error("smartthings_find_device_by_name:Device:"+deviceName+":NOT FOUND!!!")
+				return None
+			
+			logging.info("smartthings_find_device_by_name:smartthings query:"+device_name+":value:"+str(device.status.switch))
+
+		return device 
+
+	# Helper Function
+	async def setDeviceStatus(device, value):
+		logging.info ("Smartthings:Set Device:"+str(device.label) + " to "+str(value))
+		
+		await device.status.refresh()
+		
+		logging.info("Smartthings:Set Device: Prior Switch: "+str(device.status.switch))
+		
+		if value:
+			result = await device.switch_on()
+			logging.info("Smartthings:Set Device:TRUE:Result: "+ str(result))
+		else:
+			result = await device.switch_off()
+			logging.info ("Smartthings:Set Device:TRUE:Result: "+ str(result))
+	
 	#Smartthings Query
-	def smartthings_query(self, device_type, device_name):
+	#Device Typr doesnt matter at this time for Smartthings
+	async def smartthings_query(self, device_type, device_name):
 		data = {"type":device_type, "name":device_name, "state":False}
 		
-		#JB - Make Query
-		
-		
+		# Make Query
+		token = self.smartthings_token
+
+		logging.info("smarthhings query:type:"+ device_type+":name:"+device_name+":token:"+token)
+
+		device = await self.smartthings_find_device_by_name(device_name)
+
+		# Error Check
+		if (device == None):
+			logging.info("smartthings_query:"+":failed to find device:"+device_name)
+			return None
+
+		data["state"] = device.status.switch
+
 		return data
 	
 	#Smartthings Set
-	def smartthings_set(self, device_type, device_name, cmd):
+	async def smartthings_set(self, device_type, device_name, cmd):
 		
-		#JB - Make update
+		# Make update
 
+		logging.info("smartthings_set:device type:"+device_type+":devuce name:"+device_name+":cmd:"+str(cmd))
+
+		device = await self.smartthings_find_device_by_name(device_name)
+
+		if (device == None):
+			logging.info("smartthings_set:device not found:"+":name:"+device_name)
+			return
+		
+		if (cmd == "on"):
+			result = await device.switch_on()
+			logging.info("smartthings_set:name:"+str(result))
+		else:
+			result = await device.switch_off()
+			logging.info("smartthings_set:name:"+str(result))
+		
 		return
 
 
@@ -105,7 +177,7 @@ class SmartController:
 	def query(self, controller, device_type, device_name):
 		if controller == "SAMSUNG":
 			try:
-				return self.smartthings_query(device_type, device_name)
+				return asyncio.run(self.smartthings_query(device_type, device_name))
 			except:
 				logging.critical("Smart Controller Query: Smartthings:Failed")
 				return {"type":"None", "name":"None", "state":False}
@@ -125,7 +197,7 @@ class SmartController:
 		#JB - Support Set for HARMONY Devices
 		if controller == "SAMSUNG":
 			try:
-				req = self.smartthings_set(device_type,device_name, cmd])
+				req = asyncio.run(self.smartthings_set(device_type,device_name, cmd))
 			except:
 				logging.critical("Smart Controller Set:Failed to Set the device")
 				return None

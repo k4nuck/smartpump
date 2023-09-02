@@ -28,7 +28,7 @@ import sys
 import time
 import logging
 
-from smartcontroller import *
+from smartutils.smartcontroller import *
 
 
 ''''

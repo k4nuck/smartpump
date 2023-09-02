@@ -27,7 +27,7 @@ import sys
 import logging
 import time
 
-from smarthomedb import *
+from smartutils.smarthomedb import *
 
 class SmartHomeUtils:
 	# Initialization
