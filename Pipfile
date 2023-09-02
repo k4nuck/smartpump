@@ -5,6 +5,8 @@ name = "pypi"
 
 [packages]
 pysmartthings = "*"
+couchdb = "*"
+pyharmony = "*"
 
 [dev-packages]
 

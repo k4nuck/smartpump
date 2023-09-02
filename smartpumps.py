@@ -29,8 +29,8 @@ import logging
 import time
 
 from smartpump import *
-from smartdevice import *
-from smarthomeutils import *
+from smartutils.smartdevice import *
+from smartutils.smarthomeutils import *
 
 '''
 Handle Smart Pump Usage

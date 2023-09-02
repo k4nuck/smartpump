@@ -29,8 +29,8 @@ import logging
 import time
 from datetime import timedelta
 
-from smartdevice import *
-from smarthomeutils import *
+from smartutils.smartdevice import *
+from smartutils.smarthomeutils import *
 
 '''
 Handle Smart Pump Usage

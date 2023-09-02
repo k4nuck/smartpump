@@ -28,7 +28,11 @@ import sys
 import logging
 import time
 
-from smartthings import *
+import asyncio
+import aiohttp
+import pysmartthings
+import json
+
 from pyharmony import client as harmony_client
 
 '''
@@ -41,71 +45,45 @@ from pyharmony import client as harmony_client
 class SmartController:
 	
 	def __init__ (self):
-		self.smartthings_cache={}
-		self.smartthings_cache_timestamp=None
-		self.smartthings=SmartThings()
+		#Get Config Data for Smartthings
+		with open("/home/k4nuck/.smartthings_settings.json") as smartthings_object:
+			snartthings_data = json.load(smartthings_object)
+			self.smartthings_token = snartthings_data["token"]
+			logging.debug("Smartthings Config - token:"+self.smartthings_token)
+
 		
 		# Get Config Data for Harmony Hub
-		with open("/home/pi/.harmony_settings.json") as harmony_object:
+		with open("/home/k4nuck/.harmony_settings.json") as harmony_object:
 			harmony_data = json.load(harmony_object)
-			self.ip = harmony_data["ip"]
-			self.port = harmony_data["port"]
-			logging.debug("ip:"+self.ip+" - port:"+self.port)
+			self.harmony_ip = harmony_data["ip"]
+			self.harmony_port = harmony_data["port"]
+			logging.debug("Harmony Config - ip:"+self.harmony_ip+" - port:"+self.harmony_port)
 	
-	# Since the smartthings access gets values for all devices.  We get it once and cache for some delta
-	def update_smartthings_cache(self):
-		logging.debug("Update Smartthings Cache")
 		
-		# Get All Smartthings Motion Sensors
-		try:
-			req = self.smartthings.smart_request(["query","motion","all"])
-		except:
-			logging.critical("Update Smarthings Cache:Failed Getting Motion Values")
-			return
-			
-		for device in req:
-			if device["type"] not in self.smartthings_cache:
-				self.smartthings_cache[device["type"]] = {}
-			
-			# Update Cache
-			self.smartthings_cache[device["type"]][device["name"]] = {"type":device["type"], "name":device["name"], "state":device["state"]}
-			
-		# Get All Smartthings Switches
-		try:
-			req = self.smartthings.smart_request(["query","switch","all"])
-		except:
-			logging.critical("Update Smarthings Cache:Failed Getting Switch Values")
-			return
-			
-		for device in req:
-			if device["type"] not in self.smartthings_cache:
-				self.smartthings_cache[device["type"]] = {}
-			
-			# Update Cache
-			self.smartthings_cache[device["type"]][device["name"]] = {"type":device["type"], "name":device["name"], "state":device["state"]}
-			
-		logging.debug(self.smartthings_cache)
+	#Smartthings Query
+	def smartthings_query(self, device_type, device_name):
+		data = {"type":device_type, "name":device_name, "state":False}
 		
-		#Update timestampe
-		self.smartthings_cache_timestamp = time.time()
+		#JB - Make Query
+		
+		
+		return data
 	
-	# Query from the cache.  Invalidate if necessary
-	def smartthings_query_cache(self, device_type, device_name):
-		# Check cache - Invalidate after 3 seconds
-		if (self.smartthings_cache_timestamp == None) or ((time.time() - self.smartthings_cache_timestamp) > 3):
-			self.update_smartthings_cache()
-		else:
-			logging.debug("Using smartthings query cache")
+	#Smartthings Set
+	def smartthings_set(self, device_type, device_name, cmd):
 		
-		return self.smartthings_cache[device_type][device_name]
-		
+		#JB - Make update
+
+		return
+
+
 	# Query Harmony Devices
 	def harmony_query(self, device_type, device_name):
 		data = {"type":device_type, "name":device_name, "state":False}
 		
 		#This IP and PORT from config
-		ip = self.ip
-		port = self.port
+		ip = self.harmony_ip
+		port = self.harmony_port
 		activity_callback=None
 		client = harmony_client.create_and_connect_client(ip, port, activity_callback)
 	
@@ -127,7 +105,7 @@ class SmartController:
 	def query(self, controller, device_type, device_name):
 		if controller == "SAMSUNG":
 			try:
-				return self.smartthings_query_cache(device_type, device_name)
+				return self.smartthings_query(device_type, device_name)
 			except:
 				logging.critical("Smart Controller Query: Smartthings:Failed")
 				return {"type":"None", "name":"None", "state":False}
@@ -147,7 +125,7 @@ class SmartController:
 		#JB - Support Set for HARMONY Devices
 		if controller == "SAMSUNG":
 			try:
-				req = self.smartthings.smart_request(["set",device_type,device_name, cmd])
+				req = self.smartthings_set(device_type,device_name, cmd])
 			except:
 				logging.critical("Smart Controller Set:Failed to Set the device")
 				return None

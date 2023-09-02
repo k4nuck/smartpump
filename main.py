@@ -31,8 +31,6 @@ import logging
 from logging.handlers import RotatingFileHandler
 from subprocess import call
 
-sys.path.append("/home/pi/projects/smarthome/") 
-
 from smartpumps import *
 
 #JB - Create Web Worker to handle sending requests from the Web
@@ -43,7 +41,7 @@ def fifo_worker(mainLoopQueue):
 	logging.info("FIFO Worker Spawned")
 	
 	# Create FIFO File if needed
-	path = "/home/pi/projects/smarthome/smartpump/pump.fifo"
+	path = "/home/k4nuck/projects/smartpump/pump.fifo"
 	if not os.path.exists(path):
 		os.mkfifo(path)
 	
@@ -87,7 +85,7 @@ def main():
 	# Setup Logging
 	log_level = logging.INFO
 	logging.basicConfig(format='%(asctime)-15s %(levelname)-8s %(message)s', level=log_level)
-	hdlr = RotatingFileHandler("/home/pi/projects/smarthome/smartpump/smartpump.log", maxBytes=(1048576*5), backupCount=5)
+	hdlr = RotatingFileHandler("/home/k4nuck/projects/smartpump/smartpump.log", maxBytes=(1048576*5), backupCount=5)
 	logger = logging.getLogger("")
 	formatter = logging.Formatter('%(asctime)-15s %(levelname)-8s %(message)s')
 	hdlr.setFormatter(formatter)
@@ -96,7 +94,7 @@ def main():
 	logging.info( "Smart Pump Started")
 	
 	# Get data from JSON File
-	with open("/home/pi/projects/smarthome/smartpump/smartpump_config.json") as json_object:
+	with open("/home/k4nuck/projects/smartpump/smartpump_config.json") as json_object:
 		json_data = json.load(json_object)
 		myPumps = SmartPumps(json_data)
 		
