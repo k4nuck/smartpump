@@ -61,32 +61,37 @@ class SmartController:
 	
 	# Helper Function	
 	def findDevice(devices,label):
-		logging.info("Smarthings:FindDevice:"+str(len(devices))+" Devices found")
+		logging.debug("Smarthings:FindDevice:"+str(len(devices))+" Devices found")
+		logging.debug("Smarthings:FindDevice:label:"+str(label))
+
 		
 		for device in devices:
-			logging.info("Smarthings:FindDevice:"+device.label+"("+str(device.device_id)+")")
+			logging.debug("Smarthings:FindDevice:"+device.label+"("+str(device.device_id)+")")
 			if(device.label == label):
 				return device
 			
-			return None
+		return None
 
 	#Helper function
 	# Return pysmartthings object
 	async def smartthings_find_device_by_name(self, device_name):
 		device = None
+		token = self.smartthings_token
+
+		logging.info("Smartthings_find_by_name:token:"+str(token)+":device name:"+str(device_name))
 
 		async with aiohttp.ClientSession() as session:
 			api = pysmartthings.SmartThings(session, token)
 			
 			devices = await api.devices()
-			deviceName = "device_name"
+			deviceName = device_name
 			device = SmartController.findDevice(devices, deviceName)
 
 			if (device == None):
 				logging.error("smartthings_find_device_by_name:Device:"+deviceName+":NOT FOUND!!!")
 				return None
 			
-			logging.info("smartthings_find_device_by_name:smartthings query:"+device_name+":value:"+str(device.status.switch))
+		logging.info("smartthings_find_device_by_name:smartthings query:"+device_name+":value:"+str(device.status.switch))
 
 		return device 
 
@@ -99,9 +104,11 @@ class SmartController:
 		logging.info("Smartthings:Set Device: Prior Switch: "+str(device.status.switch))
 		
 		if value:
+			logging.info("smartthings Set Statud:ON:"+device.label)
 			result = await device.switch_on()
 			logging.info("Smartthings:Set Device:TRUE:Result: "+ str(result))
 		else:
+			logging.info("smartthings Set Statud:OFF:"+device.label)
 			result = await device.switch_off()
 			logging.info ("Smartthings:Set Device:TRUE:Result: "+ str(result))
 	
@@ -110,9 +117,11 @@ class SmartController:
 	async def smartthings_query(self, device_type, device_name):
 		data = {"type":device_type, "name":device_name, "state":False}
 		
-		# Make Query
 		token = self.smartthings_token
 
+		logging.info("Smartthings_query:token:"+str(token)+":device name:"+device_name)
+		
+		# Make Query
 		logging.info("smarthhings query:type:"+ device_type+":name:"+device_name+":token:"+token)
 
 		device = await self.smartthings_find_device_by_name(device_name)
@@ -120,7 +129,7 @@ class SmartController:
 		# Error Check
 		if (device == None):
 			logging.info("smartthings_query:"+":failed to find device:"+device_name)
-			return None
+			return data
 
 		data["state"] = device.status.switch
 
@@ -131,7 +140,7 @@ class SmartController:
 		
 		# Make update
 
-		logging.info("smartthings_set:device type:"+device_type+":devuce name:"+device_name+":cmd:"+str(cmd))
+		logging.info("smartthings_set:device type:"+device_type+":device name:"+device_name+":cmd:"+str(cmd))
 
 		device = await self.smartthings_find_device_by_name(device_name)
 
@@ -140,11 +149,11 @@ class SmartController:
 			return
 		
 		if (cmd == "on"):
-			result = await device.switch_on()
-			logging.info("smartthings_set:name:"+str(result))
+			logging.info("smartthings_set:ON:"+device.label)
+			await SmartController.setDeviceStatus(device,True)
 		else:
-			result = await device.switch_off()
-			logging.info("smartthings_set:name:"+str(result))
+			logging.info("smartthings_set:OFF:"+device.label)
+			await SmartController.setDeviceStatus(device,False)
 		
 		return
 
@@ -178,8 +187,8 @@ class SmartController:
 		if controller == "SAMSUNG":
 			try:
 				return asyncio.run(self.smartthings_query(device_type, device_name))
-			except:
-				logging.critical("Smart Controller Query: Smartthings:Failed")
+			except Exception as X:
+				logging.critical("Smart Controller Query: Smartthings:Failed:"+str(X))
 				return {"type":"None", "name":"None", "state":False}
 				
 		if controller == "HARMONY":
@@ -196,13 +205,13 @@ class SmartController:
 	def set(self, controller, device_type, device_name, cmd):
 		#JB - Support Set for HARMONY Devices
 		if controller == "SAMSUNG":
+			#return asyncio.run(self.smartthings_set(device_type,device_name, cmd))
 			try:
 				req = asyncio.run(self.smartthings_set(device_type,device_name, cmd))
-			except:
-				logging.critical("Smart Controller Set:Failed to Set the device")
+			except Exception as X:
+				logging.critical("Smart Controller Set:Failed to Set the device:"+str(X))
 				return None
 					
-			return req
 		else:
 			logging.warning( "SmartController:Set:UNKNOWN Controller: "+controller)
 			return None
