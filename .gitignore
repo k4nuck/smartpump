@@ -4,3 +4,4 @@
 *workspace
 Pipfile*
 *.fifo
+*pycache*

@@ -116,8 +116,12 @@ class SmartDevice:
 				self.device_state = True
 		else:
 			if not self.device_state:
-				logging.debug("Device Set No OP:"+cmd)
-				return None
+				logging.critical("Device Set No OP .. Forcing OFF anyway:"+cmd)
+				# No longer NOOPING as I have seen race conditions with the Samsung 
+				# API where it is out of sync for over 30 seconds and it would look like
+				# the device is off when it is really ON!!  In critical state the device
+				# will ALWAYS force to be turned off!!!
+				#return None
 			else:
 				logging.debug("Device Set Make Request:"+cmd)
 				self.device_state = False

@@ -70,8 +70,8 @@ class SmartPump:
 		# Update Cache to make sure we have a default
 		self.update_smartpump_state()
 
-		#JB - Debug  ... Uncomment to force Pump to turn on on start for debuggin
-		self.set_pump_on()
+		# JB - Debug  ... Uncomment to force Pump to turn on on start for debuggin
+		# self.set_pump_on()
 
 		
 	# In Schedule Flag
