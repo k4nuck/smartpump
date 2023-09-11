@@ -33,7 +33,7 @@ import aiohttp
 import pysmartthings
 
 '''''
-' Controller from smartthings 
+' Controller for smartthings 
 '''
 
 class SmartthingsController:
@@ -73,7 +73,7 @@ class SmartthingsController:
 		return None
 	
 	# Query State of a smartthings device by name
-	async def query_by_name(self,device_name):
+	async def query_state_by_name(self,device_name):
 		device = None
 		token = self.token
 
@@ -100,26 +100,26 @@ class SmartthingsController:
 	
 	# Helper Function
 	async def set_state(device, value):
-		logging.info ("SmartthingsController:Set Device:"+str(device.label) + " to "+str(value))
+		logging.debug ("SmartthingsController:Set Device:"+str(device.label) + " to "+str(value))
 		
 		await device.status.refresh()
 		
-		logging.info("SmartthingsController:Set Device: Prior Switch: "+str(device.status.switch))
+		logging.debug("SmartthingsController:Set Device: Prior Switch: "+str(device.status.switch))
 		
 		if value:
-			logging.info("SmartthingsController:Set Status:ON:"+device.label)
+			logging.debug("SmartthingsController:Set Status:ON:"+device.label)
 			result = await device.switch_on()
-			logging.info("SmartthingsController:Set Device:TRUE:Result: "+ str(result))
+			logging.debug("SmartthingsController:Set Device:TRUE:Result: "+ str(result))
 		else:
-			logging.info("SmartthingsController:Set Status:OFF:"+device.label)
+			logging.debug("SmartthingsController:Set Status:OFF:"+device.label)
 			result = await device.switch_off()
-			logging.info ("SmartthingsController:Set Device:FALSE:Result: "+ str(result))
+			logging.debug ("SmartthingsController:Set Device:FALSE:Result: "+ str(result))
 
 	# Set State of a device by name
 	async def set_state_by_name(self, device_name, value):
 		token = self.token
 
-		logging.info("SmartthingsController:set_by_name:token:"+str(token)+"device Name:"+device_name+":Value:"+str(value))
+		logging.debug("SmartthingsController:set_by_name:token:"+str(token)+"device Name:"+device_name+":Value:"+str(value))
 
 		# Get Device and Set it
 		async with self.get_smartthings_session() as session:

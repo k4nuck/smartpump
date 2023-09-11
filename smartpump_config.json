@@ -17,6 +17,24 @@
 				"end_hh":23,
 				"end_mm":0
 			}]
+		},
+		{
+			"controller":"HOMEASSISTANT", 
+			"device_type":"switch", 
+			"device_name":"recirculation_pump_switch",
+			"pump":{"on":60,"off":2400},
+			"schedule":[{
+				"start_hh":6,
+				"start_mm":0,
+				"end_hh":14,
+				"end_mm":0
+			},
+			{
+				"start_hh":18,
+				"start_mm":0,
+				"end_hh":23,
+				"end_mm":0
+			}]
 		}
 	]
 }
