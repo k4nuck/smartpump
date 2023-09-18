@@ -123,10 +123,10 @@ class SmartController:
 
 		# Set State of Device
 		if cmd == "on":
-			logging.info("ha_set:True")
+			logging.debug("ha_set:True")
 			self.ha_controller.set_state_by_name(device_type,device_name,True)
 		else:
-			logging.info("ha_set:False")
+			logging.debug("ha_set:False")
 			self.ha_controller.set_state_by_name(device_type,device_name,False)
 
 	
