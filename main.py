@@ -26,7 +26,6 @@
 import multiprocessing 
 import time
 import os
-import sys
 import logging
 from logging.handlers import RotatingFileHandler
 from subprocess import call
