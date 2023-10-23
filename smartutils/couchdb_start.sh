@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker run -p 5984:5984 -d -v ~/.local/opt/couchdb/data:/opt/couchdb/data treehouses/couchdb:2.1.0
+docker run -p 5984:5984 -v /home/k4nuck/.local/opt/couchdb/data:/opt/couchdb/data -d --restart always couchdb:2.1
